@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-console.log("Write Routes in here");
-=======
 import { Router } from "express";
 import {
      createAdmin,
@@ -25,4 +22,3 @@ adminRouter.put("/:id", updateAdmin);
 adminRouter.delete("/:id", deleteAdmin);
 
 export default adminRouter;
->>>>>>> master

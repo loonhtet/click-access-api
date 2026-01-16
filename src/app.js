@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-console.log("Hello Stupids");
-=======
 import express from "express";
 import { config } from "dotenv";
 import { connectDB, disconnectDB } from "./config/db.js";
@@ -40,4 +37,3 @@ process.on("SIGTERM", () => {
      disconnectDB();
      process.exit(0);
 });
->>>>>>> master
