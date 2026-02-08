@@ -228,7 +228,7 @@ const deleteUser = async (req, res) => {
 };
 
 export {
-  getRoles,
+  getUsers,
   getUserLookup,
   getSingleUser,
   createUser,
