@@ -1,23 +1,29 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma/client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model Admin {
+model User {
   id        String   @id @default(uuid())
   image     String?  @db.Text
   email     String   @unique
   name      String   @db.VarChar(100)
   password  String   @db.VarChar(100)
-  role      String   @db.VarChar(50)
   register  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(100) @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 
 model Email {
   id        String   @id @default(uuid())
