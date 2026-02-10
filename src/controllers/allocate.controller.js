@@ -67,6 +67,25 @@ const assignStudentToTutor = async (req, res) => {
       },
     });
 
+    if (updatedStudent) {
+      console.log("stu",student)
+      const existingConversation =await prisma.conversation.findFirst({
+        where: {
+          studentId: student.userId,
+          tutorId:tutor.userId,
+        },
+      });
+
+      if (!existingConversation) {
+        await prisma.conversation.create({
+          data: {
+            studentId: student.userId,
+            tutorId: tutor.userId,
+          },
+        });
+      }
+    }
+
     res.status(200).json({
       status: "success",
       message: `Student ${student.user.name} assigned to tutor ${tutor.user.name}`,
@@ -98,6 +117,12 @@ const unassignStudentFromTutor = async (req, res) => {
             name: true,
           },
         },
+
+        tutor:{
+          select:{
+            userId:true,
+          }
+        }
       },
     });
 
@@ -115,12 +140,21 @@ const unassignStudentFromTutor = async (req, res) => {
       });
     }
 
-    await prisma.student.update({
+   const updatedStudent = await prisma.student.update({
       where: { id: studentId },
       data: {
         tutorId: null,
       },
     });
+
+    if(updatedStudent) {
+      await prisma.conversation.deleteMany({
+        where: {
+          studentId: student.userId,
+          tutorId: student.tutor.userId,
+        },
+      });
+    }
 
     res.status(200).json({
       status: "success",
@@ -250,12 +284,12 @@ const getStudentWithTutor = async (req, res) => {
         hasTutor: !!student.tutor,
         tutor: student.tutor
           ? {
-              userId: student.tutor.userId,
-              name: student.tutor.user.name,
-              email: student.tutor.user.email,
-              image: student.tutor.user.image,
-              assignedAt: student.updatedAt,
-            }
+            userId: student.tutor.userId,
+            name: student.tutor.user.name,
+            email: student.tutor.user.email,
+            image: student.tutor.user.image,
+            assignedAt: student.updatedAt,
+          }
           : null,
       },
     });

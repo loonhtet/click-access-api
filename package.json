@@ -21,6 +21,7 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "~1.9.1",
     "nodemailer": "^7.0.12",
+    "socket.io": "^4.8.3",
     "zod": "^4.3.5"
   },
   "devDependencies": {

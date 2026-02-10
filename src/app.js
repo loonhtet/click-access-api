@@ -8,11 +8,20 @@ import cors from "cors";
 import roleRouter from "./routes/role.route.js";
 import { protect } from "./middleware/authMiddleware.js";
 import allocateRouter from "./routes/allocate.route.js";
+import conversationRouter from "./routes/conversation.route.js";
+
+
+import { initSocket } from "./socket.js";
+import http from "http";
 
 config();
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+const io = initSocket(server);
+app.set("io", io);
+
 
 app.use(
   cors({
@@ -28,6 +37,8 @@ app.use("/api/v1/users", protect, userRouter);
 app.use("/api/v1/roles", protect, roleRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/allocate", protect, allocateRouter);
+app.use("/api/v1/conversation", protect, conversationRouter );
+
 
 // app.use("/api/v1/email", emailRouter);
 
@@ -45,7 +56,7 @@ app.use((err, req, res) => {
   });
 });
 
-app.listen(3000, () => {
+server.listen(3000, () => {
   console.log("Server running on port http://localhost:3000");
 });
 

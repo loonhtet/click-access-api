@@ -1,55 +1,82 @@
 import nodemailer from "nodemailer";
 
+import fs from "fs";
+
+import path from "path";   // ✅ ADD THIS LINE
+ 
 const transporter = nodemailer.createTransport({
-<<<<<<< HEAD
-     host: process.env.EMAIL_HOST,
-     port: process.env.EMAIL_PORT,
-     secure: false,
-     auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-     },
-});
 
-async function sendEmail({ to, subject, message }) {
-     if (!to || !subject || !message) {
-          throw new Error("Missing required fields");
-     }
-
-     const info = await transporter.sendMail({
-          from: `"Email API" <${process.env.EMAIL_USER}>`,
-          to,
-          subject,
-          text: message,
-          html: `<p>${message}</p>`,
-     });
-
-     return info.messageId;
-=======
   host: process.env.EMAIL_HOST,
+
   port: process.env.EMAIL_PORT,
+
   secure: false,
+
   auth: {
+
     user: process.env.EMAIL_USER,
+
     pass: process.env.EMAIL_PASS,
+
   },
+
 });
+ 
+// Render HTML template
 
-async function sendEmail({ to, subject, message }) {
-  if (!to || !subject || !message) {
-    throw new Error("Missing required fields");
+function renderTemplate(templateName, variables) {
+
+  const templatePath = path.join(
+
+    process.cwd(),
+
+    "src",
+
+    "templates",
+
+    templateName
+
+  );
+ 
+  let html = fs.readFileSync(templatePath, "utf-8");
+ 
+  for (const key in variables) {
+
+    const regex = new RegExp(`{{${key}}}`, "g");
+
+    html = html.replace(regex, variables[key]);
+
   }
+ 
+  return html;
 
-  const info = await transporter.sendMail({
-    from: `"Email API" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    text: message,
-    html: `<p>${message}</p>`,
-  });
-
-  return info.messageId;
->>>>>>> feat/admin
 }
+ 
+async function sendEmail({ to, subject, template, variables }) {
 
+  if (!to || !subject || !template) {
+
+    throw new Error("Missing required fields");
+
+  }
+ 
+  const html = renderTemplate(template, variables || {});
+ 
+  const info = await transporter.sendMail({
+
+    from: `"Email API" <${process.env.EMAIL_USER}>`,
+
+    to,
+
+    subject,
+
+    html,
+
+  });
+ 
+  return info.messageId;
+
+}
+ 
 export default sendEmail;
+ 
