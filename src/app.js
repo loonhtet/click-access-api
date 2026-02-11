@@ -28,7 +28,7 @@ app.use("/api/v1/users", protect, userRouter);
 app.use("/api/v1/roles", protect, roleRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/allocate", protect, allocateRouter);
-app.use("/api/v1/email",emailRouter);
+app.use("/api/v1/email", emailRouter);
 
 app.use((req, res) => {
   res.status(404).json({
