@@ -8,11 +8,21 @@ import roleRouter from "./routes/role.route.js";
 import { protect } from "./middleware/authMiddleware.js";
 import allocateRouter from "./routes/allocate.route.js";
 import emailRouter from "./routes/email.route.js";
+import rateLimit from "express-rate-limit";
 
 config();
 connectDB();
 
 const app = express();
+
+const globalLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 10,
+  message: {
+    success: false,
+    message: "Too many requests, please try again later.",
+  },
+});
 
 app.use(
   cors({
@@ -23,6 +33,8 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(globalLimiter);
 
 app.use("/api/v1/users", protect, userRouter);
 app.use("/api/v1/roles", protect, roleRouter);
