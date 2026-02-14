@@ -2,26 +2,9 @@ import { prisma } from "../config/db.js";
 
 const assignStudentToTutor = async (req, res) => {
   try {
-    const { studentId, tutorId } = req.body;
+    const { studentIds, tutorId } = req.body;
 
-    const student = await prisma.student.findUnique({
-      where: { id: studentId },
-      include: {
-        user: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
-    if (!student) {
-      return res.status(404).json({
-        status: "error",
-        message: "Student not found",
-      });
-    }
-
+    // Verify tutor exists
     const tutor = await prisma.tutor.findUnique({
       where: { id: tutorId },
       include: {
@@ -40,10 +23,67 @@ const assignStudentToTutor = async (req, res) => {
       });
     }
 
-    const updatedStudent = await prisma.student.update({
-      where: { id: studentId },
+    // Verify all students exist
+    const students = await prisma.student.findMany({
+      where: {
+        id: {
+          in: studentIds,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        tutor: {
+          include: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Check if all requested students were found
+    if (students.length !== studentIds.length) {
+      const foundIds = students.map((s) => s.id);
+      const notFoundIds = studentIds.filter((id) => !foundIds.includes(id));
+
+      return res.status(404).json({
+        status: "error",
+        message: "Some students not found",
+        notFoundIds,
+      });
+    }
+
+    // Check which students are already assigned to other tutors
+    // const alreadyAssigned = students.filter(
+    //   (student) => student.tutorId && student.tutorId !== tutorId,
+    // );
+
+    // Update all students to new tutor
+    await prisma.student.updateMany({
+      where: {
+        id: {
+          in: studentIds,
+        },
+      },
       data: {
         tutorId: tutorId,
+      },
+    });
+
+    // Fetch updated students with full details
+    const updatedStudents = await prisma.student.findMany({
+      where: {
+        id: {
+          in: studentIds,
+        },
       },
       include: {
         user: {
@@ -85,21 +125,40 @@ const assignStudentToTutor = async (req, res) => {
         });
       }
     }
+    const studentNames = students.map((s) => s.user.name).join(", ");
+    const message =
+      studentIds.length === 1
+        ? `Student ${studentNames} assigned to tutor ${tutor.user.name}`
+        : `${studentIds.length} students assigned to tutor ${tutor.user.name}`;
 
     res.status(200).json({
       status: "success",
-      message: `Student ${student.user.name} assigned to tutor ${tutor.user.name}`,
+      message,
       data: {
-        studentId: updatedStudent.id,
-        studentName: updatedStudent.user.name,
-        tutorId: updatedStudent.tutor.id,
-        tutorName: updatedStudent.tutor.user.name,
+        tutorId: tutor.id,
+        tutorName: tutor.user.name,
+        assignedCount: updatedStudents.length,
+        students: updatedStudents.map((student) => ({
+          studentId: student.id,
+          studentName: student.user.name,
+          studentEmail: student.user.email,
+        })),
+        // reassignedFromOtherTutors:
+        //   alreadyAssigned.length > 0
+        //     ? {
+        //         count: alreadyAssigned.length,
+        //         details: alreadyAssigned.map((s) => ({
+        //           studentName: s.user.name,
+        //           previousTutorName: s.tutor?.user?.name || "Unknown",
+        //         })),
+        //       }
+        //     : undefined,
       },
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message: "Failed to assign student to tutor",
+      message: "Failed to assign students to tutor",
       error: error.message,
     });
   }

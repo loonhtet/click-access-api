@@ -3,7 +3,6 @@ import { config } from "dotenv";
 import { connectDB, disconnectDB } from "./config/db.js";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
-// import emailRouter from "./routes/email.route.js";
 import cors from "cors";
 import roleRouter from "./routes/role.route.js";
 import { protect } from "./middleware/authMiddleware.js";
@@ -13,6 +12,7 @@ import conversationRouter from "./routes/conversation.route.js";
 
 import { initSocket } from "./socket.js";
 import http from "http";
+import emailRouter from "./routes/email.route.js";
 
 config();
 connectDB();
@@ -41,6 +41,7 @@ app.use("/api/v1/conversation", protect, conversationRouter );
 
 
 // app.use("/api/v1/email", emailRouter);
+app.use("/api/v1/email", emailRouter);
 
 app.use((req, res) => {
   res.status(404).json({
