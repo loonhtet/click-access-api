@@ -6,11 +6,14 @@ import path from "path";
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
-  secure: false,
+  secure: process.env.EMAIL_PORT,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 5000,
+  greetingTimeout: 5000,
+  socketTimeout: 5000,
 });
 
 function renderTemplate(templateName, variables) {
@@ -18,7 +21,7 @@ function renderTemplate(templateName, variables) {
     process.cwd(),
     "src",
     "templates",
-    templateName
+    templateName,
   );
 
   let html = fs.readFileSync(templatePath, "utf-8");

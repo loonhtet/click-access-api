@@ -9,7 +9,7 @@ const getUsers = async (req, res) => {
     const whereClause = role
       ? {
           role: {
-            role: role, // Changed: direct access instead of 'some'
+            role: role,
           },
         }
       : {};
@@ -24,7 +24,6 @@ const getUsers = async (req, res) => {
         createdAt: true,
         updatedAt: true,
         role: {
-          // Changed: singular instead of array
           select: {
             role: true,
           },
@@ -37,7 +36,7 @@ const getUsers = async (req, res) => {
 
     const transformedData = result.data.map((user) => ({
       ...user,
-      role: user.role?.role || null, // Changed: return single role or null
+      role: user.role?.role || null,
     }));
 
     res.status(200).json({
@@ -61,7 +60,7 @@ const getUserLookup = async (req, res) => {
     const whereClause = role
       ? {
           role: {
-            role: role, // Changed: direct access
+            role: role,
           },
         }
       : {};
@@ -105,7 +104,6 @@ const getSingleUser = async (req, res) => {
         createdAt: true,
         updatedAt: true,
         role: {
-          // Changed: singular
           select: {
             role: true,
           },
@@ -159,7 +157,7 @@ const getSingleUser = async (req, res) => {
 
     const transformedUser = {
       ...user,
-      role: user.role?.role || null, // Changed: return single role or null
+      role: user.role?.role || null,
     };
 
     res.status(200).json({
@@ -212,8 +210,6 @@ const createUser = async (req, res) => {
         },
       });
 
-      // Removed: Role table lookup - no longer needed
-      // Create UserRole entry directly
       await tx.userRole.create({
         data: {
           userId: user.id,
@@ -306,7 +302,6 @@ const updateUser = async (req, res) => {
         createdAt: true,
         updatedAt: true,
         role: {
-          // Changed: singular
           select: {
             role: true,
           },
