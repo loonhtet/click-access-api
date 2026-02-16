@@ -40,11 +40,10 @@ const login = async (req, res) => {
         name: user.name,
         email: user.email,
         image: user.image,
-        role: user.role?.role || null, // Include role in response
+        role: user.role.role,
       },
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       status: "error",
       message: "Could not login",
