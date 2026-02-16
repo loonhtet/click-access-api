@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   login,
   logout,
-  resendOTP,
   resetPassword,
   sendOTP,
   verifyOTP,
