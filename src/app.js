@@ -9,6 +9,7 @@ import { protect } from "./middleware/authMiddleware.js";
 import allocateRouter from "./routes/allocate.route.js";
 import emailRouter from "./routes/email.route.js";
 import rateLimit from "express-rate-limit";
+import scheduleRouter from "./routes/schedule.route.js";
 
 config();
 connectDB();
@@ -36,10 +37,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(globalLimiter);
 
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", protect, userRouter);
 app.use("/api/v1/roles", protect, roleRouter);
-app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/allocate", protect, allocateRouter);
+app.use("/api/v1/schedule", protect, scheduleRouter);
 app.use("/api/v1/email", emailRouter);
 
 app.use((req, res) => {
@@ -57,8 +59,8 @@ app.use((err, req, res) => {
 });
 
 if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  app.listen(process.env.PORT, () => {
+    console.log(`Server running on http://localhost:${process.env.PORT}`);
   });
 }
 
