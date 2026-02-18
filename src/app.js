@@ -57,8 +57,9 @@ app.use((err, req, res) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server running on port http://localhost:3000");
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+  console.log(`Server running on port http://localhost:${PORT}`);
 });
 
 process.on("unhandledRejection", (err) => {
