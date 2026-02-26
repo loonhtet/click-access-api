@@ -16,7 +16,6 @@ model User {
   updatedAt                                 DateTime       @updatedAt
   resetOTP                                  String?
   resetOTPExpiry                            DateTime?
-  Blog                                      Blog[]
   Conversation_Conversation_studentIdToUser Conversation[] @relation("Conversation_studentIdToUser")
   Conversation_Conversation_tutorIdToUser   Conversation[] @relation("Conversation_tutorIdToUser")
   Message_Message_receiverIdToUser          Message[]      @relation("Message_receiverIdToUser")
@@ -25,6 +24,7 @@ model User {
   studentProfile                            Student?
   tutorProfile                              Tutor?
   role                                      UserRole?
+  blogs                                     Blog[]
 }
 
 model UserRole {
@@ -91,6 +91,29 @@ model Schedule {
   @@index([tutorId])
 }
 
+model Blog {
+  id         String     @id @default(uuid())
+  title      String
+  content    String
+  userId     String
+  user       User       @relation(fields: [userId], references: [id])
+
+  assetKey   String?
+  assetType  AssetType?
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  tags       Tag[]
+}
+
+model Tag {
+  id     String  @id @default(uuid())
+  title  String  @unique
+
+  blogs  Blog[]
+}
+
 model Email {
   id        String   @id @default(uuid())
   title     String   @db.VarChar(100)
@@ -121,25 +144,6 @@ model Message {
   Conversation                  Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   User_Message_receiverIdToUser User         @relation("Message_receiverIdToUser", fields: [receiverId], references: [id], onDelete: Cascade)
   User_Message_senderIdToUser   User         @relation("Message_senderIdToUser", fields: [senderId], references: [id], onDelete: Cascade)
-}
-
-model Blog {
-  id        String     @id
-  title     String
-  content   String
-  userId    String
-  assetURL  String?
-  assetType AssetType?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime
-  User      User       @relation(fields: [userId], references: [id])
-  Tag       Tag[]
-}
-
-model Tag {
-  id    String @id
-  title String @unique
-  Blog  Blog[]
 }
 
 enum RoleType {

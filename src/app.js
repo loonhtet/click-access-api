@@ -13,6 +13,7 @@ import conversationRouter from "./routes/conversation.route.js";
 import { initSocket } from "./socket.js";
 import http from "http";
 import emailRouter from "./routes/email.route.js";
+import blogRouter from "./routes/blog.route.js";
 import rateLimit from "express-rate-limit";
 import scheduleRouter from "./routes/schedule.route.js";
 
@@ -55,7 +56,8 @@ app.use("/api/v1/conversation", protect, conversationRouter );
 
 // app.use("/api/v1/email", emailRouter);
 app.use("/api/v1/schedule", protect, scheduleRouter);
-app.use("/api/v1/email", emailRouter);
+app.use("/api/v1/email", protect, emailRouter);
+app.use("/api/v1/blog", protect, blogRouter);
 
 app.use((req, res) => {
   res.status(404).json({
