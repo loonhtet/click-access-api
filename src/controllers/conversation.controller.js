@@ -79,6 +79,7 @@ const getMessages = async (req, res) => {
         createdAt: "desc",
       },
     });
+
     res.status(200).json({
       status: "success",
       data: result,
@@ -100,7 +101,7 @@ const getAllConversations = async (req, res) => {
     const whereClause = {
       OR: [{ studentId: userId }, { tutorId: userId }],
     };
-    const conversations = await prisma.conversation.findMany({
+    const data = await prisma.conversation.findMany({
       where: whereClause,
       select: {
         id: true,
@@ -120,6 +121,14 @@ const getAllConversations = async (req, res) => {
         },
       },
     });
+
+    const conversations = data.map((conversation) => ({
+      id: conversation.id,
+      studentName: conversation.User_Conversation_studentIdToUser.name,
+      initialName: conversation.User_Conversation_studentIdToUser.name.charAt(0).toUpperCase(),
+      tutorName: conversation.User_Conversation_tutorIdToUser.name,
+      tutorInitialName: conversation.User_Conversation_tutorIdToUser.name.charAt(0).toUpperCase(),
+    }))
    
 
     res.status(200).json({

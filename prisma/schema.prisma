@@ -6,19 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum RoleType {
-  STUDENT
-  TUTOR
-  STAFF
-  ADMIN_STAFF
-}
-
-enum MeetingType {
-  VIRTUAL
-  IN_PERSON
-}
-
-
 model User {
   id                                        String         @id @default(uuid())
   image                                     String?
@@ -29,7 +16,7 @@ model User {
   updatedAt                                 DateTime       @updatedAt
   resetOTP                                  String?
   resetOTPExpiry                            DateTime?
-  role                                      UserRole?
+  Blog                                      Blog[]
   Conversation_Conversation_studentIdToUser Conversation[] @relation("Conversation_studentIdToUser")
   Conversation_Conversation_tutorIdToUser   Conversation[] @relation("Conversation_tutorIdToUser")
   Message_Message_receiverIdToUser          Message[]      @relation("Message_receiverIdToUser")
@@ -37,39 +24,40 @@ model User {
   staffProfile                              Staff?
   studentProfile                            Student?
   tutorProfile                              Tutor?
+  role                                      UserRole?
 }
 
 model UserRole {
   id        String   @id @default(uuid())
   userId    String   @unique
-  role      RoleType
   createdAt DateTime @default(now())
+  role      RoleType
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Student {
-  id        String   @id @default(uuid())
-  userId    String   @unique
+  id        String     @id @default(uuid())
+  userId    String     @unique
   tutorId   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tutor     Tutor?   @relation(fields: [tutorId], references: [id])
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   schedules Schedule[]
+  tutor     Tutor?     @relation(fields: [tutorId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([tutorId])
 }
 
 model Tutor {
-  id        String    @id @default(uuid())
-  userId    String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  students  Student[]
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   schedules Schedule[]
+  students  Student[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Staff {
@@ -82,23 +70,22 @@ model Staff {
 }
 
 model Schedule {
-  id        String      @id @default(uuid())
-  studentId String
-  tutorId   String
-  title     String      @db.VarChar(100)
-  type      MeetingType
-  date      DateTime    @db.Date
-  startTime DateTime    @db.Time
-  endTime   DateTime    @db.Time
-  link      String?
-  location  String?
-  note      String?
-  isCompleted Boolean   @default(false)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-
-  student   Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  tutor     Tutor       @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  id          String      @id @default(uuid())
+  studentId   String
+  tutorId     String
+  title       String      @db.VarChar(100)
+  type        MeetingType
+  date        DateTime    @db.Date
+  startTime   DateTime    @db.Time(6)
+  endTime     DateTime    @db.Time(6)
+  link        String?
+  location    String?
+  note        String?
+  isCompleted Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  student     Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tutor       Tutor       @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
   @@index([tutorId])
@@ -113,7 +100,7 @@ model Email {
 }
 
 model Conversation {
-  id                                String   @id @default(uuid())
+  id                                String    @id @default(uuid())
   studentId                         String
   tutorId                           String
   createdAt                         DateTime  @default(now())
@@ -124,15 +111,50 @@ model Conversation {
 }
 
 model Message {
-  id                            String   @id @default(uuid())
+  id                            String       @id @default(uuid())
   conversationId                String
   senderId                      String
   receiverId                    String
   createdAt                     DateTime     @default(now())
   updatedAt                     DateTime     @updatedAt
   content                       String
-  isRead                        Boolean      @default(false)
   Conversation                  Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   User_Message_receiverIdToUser User         @relation("Message_receiverIdToUser", fields: [receiverId], references: [id], onDelete: Cascade)
   User_Message_senderIdToUser   User         @relation("Message_senderIdToUser", fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+model Blog {
+  id        String     @id
+  title     String
+  content   String
+  userId    String
+  assetURL  String?
+  assetType AssetType?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime
+  User      User       @relation(fields: [userId], references: [id])
+  Tag       Tag[]
+}
+
+model Tag {
+  id    String @id
+  title String @unique
+  Blog  Blog[]
+}
+
+enum RoleType {
+  STUDENT
+  TUTOR
+  STAFF
+  ADMIN_STAFF
+}
+
+enum MeetingType {
+  VIRTUAL
+  IN_PERSON
+}
+
+enum AssetType {
+  IMAGE
+  VIDEO
 }

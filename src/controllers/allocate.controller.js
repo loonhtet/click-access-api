@@ -10,6 +10,7 @@ const assignStudentToTutor = async (req, res) => {
       include: {
         user: {
           select: {
+            id: true,
             name: true,
           },
         },
@@ -111,8 +112,8 @@ const assignStudentToTutor = async (req, res) => {
       for (const student of updatedStudents) {
         await prisma.conversation.create({
           data: {
-            studentId: student.id,
-            tutorId: tutorId,
+            studentId: student.user.id,
+            tutorId: tutor.user.id,
           },
         });
       }
