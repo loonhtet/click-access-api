@@ -12,53 +12,61 @@ const getSchedules = async (req, res) => {
       ...(isCompleted !== undefined && { isCompleted: isCompleted === "true" }),
     };
 
-    const result = await paginate(prisma.schedule, req, {
-      where: whereClause,
-      select: {
-        id: true,
-        title: true,
-        type: true,
-        date: true,
-        startTime: true,
-        endTime: true,
-        link: true,
-        location: true,
-        note: true,
-        isCompleted: true,
-        createdAt: true,
-        updatedAt: true,
-        student: {
-          select: {
-            id: true,
-            user: {
-              select: {
-                name: true,
-                email: true,
+    const [result, completedCount, pendingCount] = await Promise.all([
+      paginate(prisma.schedule, req, {
+        where: whereClause,
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          date: true,
+          startTime: true,
+          endTime: true,
+          link: true,
+          location: true,
+          note: true,
+          isCompleted: true,
+          createdAt: true,
+          updatedAt: true,
+          student: {
+            select: {
+              id: true,
+              user: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          tutor: {
+            select: {
+              id: true,
+              user: {
+                select: {
+                  name: true,
+                  email: true,
+                },
               },
             },
           },
         },
-        tutor: {
-          select: {
-            id: true,
-            user: {
-              select: {
-                name: true,
-                email: true,
-              },
-            },
-          },
+        orderBy: {
+          date: "asc",
         },
-      },
-      orderBy: {
-        date: "asc",
-      },
-    });
+      }),
+      prisma.schedule.count({ where: { ...whereClause, isCompleted: true } }),
+      prisma.schedule.count({ where: { ...whereClause, isCompleted: false } }),
+    ]);
 
     res.status(200).json({
       status: "success",
       data: result.data,
-      meta: result.meta,
+      meta: {
+        ...result.meta,
+        completedCount,
+        pendingCount,
+      },
     });
   } catch (error) {
     res.status(500).json({
