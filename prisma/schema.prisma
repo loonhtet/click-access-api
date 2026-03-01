@@ -16,6 +16,7 @@ model User {
   updatedAt                                 DateTime       @updatedAt
   resetOTP                                  String?
   resetOTPExpiry                            DateTime?
+  lastActive                                DateTime?
   Conversation_Conversation_studentIdToUser Conversation[] @relation("Conversation_studentIdToUser")
   Conversation_Conversation_tutorIdToUser   Conversation[] @relation("Conversation_tutorIdToUser")
   Message_Message_receiverIdToUser          Message[]      @relation("Message_receiverIdToUser")
@@ -25,6 +26,7 @@ model User {
   tutorProfile                              Tutor?
   role                                      UserRole?
   blogs                                     Blog[]
+  comments                                  Comment[]
 }
 
 model UserRole {
@@ -97,6 +99,7 @@ model Blog {
   content    String
   userId     String
   user       User       @relation(fields: [userId], references: [id])
+  slug       String?     @unique
 
   assetKey   String?
   assetType  AssetType?
@@ -105,6 +108,18 @@ model Blog {
   updatedAt  DateTime   @updatedAt
 
   tags       Tag[]
+  comments  Comment[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  blogId    String
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User       @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Tag {
@@ -146,11 +161,22 @@ model Message {
   User_Message_senderIdToUser   User         @relation("Message_senderIdToUser", fields: [senderId], references: [id], onDelete: Cascade)
 }
 
+model Sidebar {
+  id        String   @id @default(uuid())
+  role      RoleType
+  tab       String   @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([role, tab])
+  @@index([role])
+}
+
 enum RoleType {
   STUDENT
   TUTOR
   STAFF
-  ADMIN_STAFF
+  ADMIN
 }
 
 enum MeetingType {

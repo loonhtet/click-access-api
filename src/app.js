@@ -16,6 +16,8 @@ import emailRouter from "./routes/email.route.js";
 import blogRouter from "./routes/blog.route.js";
 import rateLimit from "express-rate-limit";
 import scheduleRouter from "./routes/schedule.route.js";
+import sidebarRouter from "./routes/sidebar.route.js";
+import tagRouter from "./routes/tag.router.js";
 
 config();
 connectDB();
@@ -28,7 +30,7 @@ app.set("io", io);
 
 const globalLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 100,
+  max: 500,
   message: {
     success: false,
     message: "Too many requests, please try again later.",
@@ -37,10 +39,18 @@ const globalLimiter = rateLimit({
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://e-tutoring-seven.vercel.app",
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
+
+app.options("*", cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -48,16 +58,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(globalLimiter);
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/users", protect, userRouter);
+app.use("/api/v1/users", userRouter);
 app.use("/api/v1/roles", protect, roleRouter);
-app.use("/api/v1/allocate", protect, allocateRouter);
 app.use("/api/v1/conversation", protect, conversationRouter );
-
-
 // app.use("/api/v1/email", emailRouter);
+app.use("/api/v1/allocate", allocateRouter);
 app.use("/api/v1/schedule", protect, scheduleRouter);
-app.use("/api/v1/email", protect, emailRouter);
-app.use("/api/v1/blog", protect, blogRouter);
+app.use("/api/v1/email", emailRouter);
+app.use("/api/v1/blogs", blogRouter);
+app.use("/api/v1/tags", tagRouter);
+app.use("/api/v1/sidebar", protect, sidebarRouter);
 
 app.use((req, res) => {
   res.status(404).json({
