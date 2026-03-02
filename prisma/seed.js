@@ -161,8 +161,6 @@ async function main() {
   });
   console.log("Third student user created and assigned to tutor:", student3);
 
-  await prisma.sidebar.deleteMany();
-
   // Seed sidebar permissions
   const sidebarPermissions = {
     STUDENT: ["messages", "meetings", "documents", "blog"],
