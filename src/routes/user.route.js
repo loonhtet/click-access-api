@@ -14,9 +14,9 @@ const userRouter = Router();
 
 userRouter.get("/", getUsers);
 
-userRouter.get("/:id", getSingleUser);
-
 userRouter.get("/lookup", getUserLookup);
+
+userRouter.get("/:id", getSingleUser);
 
 userRouter.post("/", validate(userSchema), createUser);
 
