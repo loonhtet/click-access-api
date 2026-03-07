@@ -4,24 +4,16 @@ import { connectDB, disconnectDB } from "./config/db.js";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import cors from "cors";
-import roleRouter from "./routes/role.route.js";
 import { protect } from "./middleware/authMiddleware.js";
-import allocateRouter from "./routes/allocate.route.js";
-import conversationRouter from "./routes/conversation.route.js";
 
 import { initSocket } from "./socket.js";
 import http from "http";
-import emailRouter from "./routes/email.route.js";
-import blogRouter from "./routes/blog.route.js";
 import rateLimit from "express-rate-limit";
-import scheduleRouter from "./routes/schedule.route.js";
-import sidebarRouter from "./routes/sidebar.route.js";
-import tagRouter from "./routes/tag.router.js";
-import userJob from "./jobs/user.job.js";
+// import userJob from "./jobs/user.job.js";
 
 config();
 connectDB();
-userJob();
+// userJob();
 
 const app = express();
 const server = http.createServer(app);
@@ -59,15 +51,6 @@ app.use(globalLimiter);
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/roles", protect, roleRouter);
-app.use("/api/v1/conversation", protect, conversationRouter);
-// app.use("/api/v1/email", emailRouter);
-app.use("/api/v1/allocate", allocateRouter);
-app.use("/api/v1/schedule", protect, scheduleRouter);
-app.use("/api/v1/email", emailRouter);
-app.use("/api/v1/blogs", blogRouter);
-app.use("/api/v1/tags", tagRouter);
-app.use("/api/v1/sidebar", protect, sidebarRouter);
 
 app.use((req, res) => {
   res.status(404).json({
