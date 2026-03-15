@@ -9,6 +9,8 @@ import { protect } from "./middleware/authMiddleware.js";
 import { initSocket } from "./socket.js";
 import http from "http";
 import rateLimit from "express-rate-limit";
+import productRouter from "./routes/product.route.js";
+import paymentRouter from "./routes/payment.route.js";
 // import userJob from "./jobs/user.job.js";
 
 config();
@@ -51,6 +53,8 @@ app.use(globalLimiter);
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/payments", paymentRouter);
 
 app.use((req, res) => {
   res.status(404).json({
