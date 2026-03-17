@@ -2,7 +2,6 @@ import express from "express";
 import { config } from "dotenv";
 import { connectDB, disconnectDB } from "./config/db.js";
 import userRouter from "./routes/user.route.js";
-import authRouter from "./routes/auth.route.js";
 import cors from "cors";
 import { protect } from "./middleware/authMiddleware.js";
 
@@ -11,6 +10,9 @@ import http from "http";
 import rateLimit from "express-rate-limit";
 import productRouter from "./routes/product.route.js";
 import paymentRouter from "./routes/payment.route.js";
+import adminAuthRouter from "./routes/auth.admin.route.js";
+import userAuthRouter from "./routes/auth.user.routes.js";
+import adminRouter from "./routes/admin.route.js";
 // import userJob from "./jobs/user.job.js";
 
 config();
@@ -51,8 +53,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(globalLimiter);
 
-app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/admin/auth", adminAuthRouter);
+app.use("/api/v1/auth", userAuthRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/admins", adminRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/payments", paymentRouter);
 

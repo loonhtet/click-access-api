@@ -5,7 +5,6 @@ import {
   getSingleUser,
   getUsers,
   updateUser,
-  getUserLookup,
 } from "../controllers/user.controller.js";
 import { userSchema } from "../schemas/user.schema.js";
 import validate from "../utils/validate.js";
@@ -13,8 +12,6 @@ import validate from "../utils/validate.js";
 const userRouter = Router();
 
 userRouter.get("/", getUsers);
-
-userRouter.get("/lookup", getUserLookup);
 
 userRouter.get("/:id", getSingleUser);
 

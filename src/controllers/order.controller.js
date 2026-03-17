@@ -118,7 +118,8 @@ const getSingleOrder = async (req, res) => {
 
 const createOrder = async (req, res) => {
   try {
-    const { userId, productId, paymentId, quantity, notes } = req.body;
+    const { userId, productId, paymentId, quantity, notes, transactionId } =
+      req.body;
 
     const [user, product, payment] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
@@ -162,13 +163,14 @@ const createOrder = async (req, res) => {
         paymentId,
         quantity: qty,
         totalAmount,
+        transactionId,
         notes: notes ?? null,
       },
     });
 
     res.status(201).json({
       status: "success",
-      message: "Order created successfully",
+      message: "Order placed successfully",
       data: { id: order.id },
     });
   } catch (error) {
@@ -183,11 +185,11 @@ const createOrder = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, transactionId, notes } = req.body;
+    const { status, notes } = req.body;
 
     const order = await prisma.order.findUnique({
       where: { id },
-      include: { product: true },
+      include: { product: true, key: true },
     });
 
     if (!order) {
@@ -216,12 +218,10 @@ const updateOrderStatus = async (req, res) => {
         where: { id },
         data: {
           ...(status && { status: status.toUpperCase() }),
-          ...(transactionId !== undefined && { transactionId }),
           ...(notes !== undefined && { notes }),
         },
       });
 
-      // Auto-create a key when order is completed
       if (status?.toUpperCase() === "COMPLETED" && !order.key) {
         const { duration, durationUnit } = order.product;
 

@@ -2,11 +2,11 @@ import { prisma } from "../config/db.js";
 import bcrypt from "bcrypt";
 import paginate from "../utils/pagination.js";
 
-const getUsers = async (req, res) => {
+const getAdmins = async (req, res) => {
   try {
     const { search } = req.query;
 
-    const result = await paginate(prisma.user, req, {
+    const result = await paginate(prisma.admin, req, {
       where: {
         ...(search && {
           OR: [
@@ -33,17 +33,17 @@ const getUsers = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message: "Failed to fetch users",
+      message: "Failed to fetch admins",
       error: error.message,
     });
   }
 };
 
-const getSingleUser = async (req, res) => {
+const getSingleAdmin = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await prisma.user.findUnique({
+    const admin = await prisma.admin.findUnique({
       where: { id },
       select: {
         id: true,
@@ -51,53 +51,32 @@ const getSingleUser = async (req, res) => {
         name: true,
         createdAt: true,
         updatedAt: true,
-        orders: {
-          select: {
-            id: true,
-            status: true,
-            totalAmount: true,
-            createdAt: true,
-            product: {
-              select: { name: true, type: true },
-            },
-          },
-          orderBy: { createdAt: "desc" },
-        },
-        keys: {
-          select: {
-            id: true,
-            status: true,
-            expiresAt: true,
-            createdAt: true,
-          },
-          orderBy: { createdAt: "desc" },
-        },
       },
     });
 
-    if (!user) {
+    if (!admin) {
       return res.status(404).json({
         status: "error",
-        message: "User not found",
+        message: "Admin not found",
       });
     }
 
-    res.status(200).json({ status: "success", data: user });
+    res.status(200).json({ status: "success", data: admin });
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message: "Failed to fetch user",
+      message: "Failed to fetch admin",
       error: error.message,
     });
   }
 };
 
-const createUser = async (req, res) => {
+const createAdmin = async (req, res) => {
   try {
     const { email, name, password } = req.body;
 
-    const userExists = await prisma.user.findUnique({ where: { email } });
-    if (userExists) {
+    const adminExists = await prisma.admin.findUnique({ where: { email } });
+    if (adminExists) {
       return res.status(400).json({
         status: "error",
         message: "Email already exists",
@@ -106,7 +85,7 @@ const createUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
+    const admin = await prisma.admin.create({
       data: { email, name, password: hashedPassword },
       select: {
         id: true,
@@ -118,33 +97,33 @@ const createUser = async (req, res) => {
 
     res.status(201).json({
       status: "success",
-      message: "User created successfully",
-      data: user,
+      message: "Admin created successfully",
+      data: admin,
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message: "Failed to create user",
+      message: "Failed to create admin",
       error: error.message,
     });
   }
 };
 
-const updateUser = async (req, res) => {
+const updateAdmin = async (req, res) => {
   try {
     const { id } = req.params;
     const { email, name } = req.body;
 
-    const userExists = await prisma.user.findUnique({ where: { id } });
-    if (!userExists) {
+    const adminExists = await prisma.admin.findUnique({ where: { id } });
+    if (!adminExists) {
       return res.status(404).json({
         status: "error",
-        message: "User not found",
+        message: "Admin not found",
       });
     }
 
-    if (email && email !== userExists.email) {
-      const emailTaken = await prisma.user.findUnique({ where: { email } });
+    if (email && email !== adminExists.email) {
+      const emailTaken = await prisma.admin.findUnique({ where: { email } });
       if (emailTaken) {
         return res.status(400).json({
           status: "error",
@@ -153,7 +132,7 @@ const updateUser = async (req, res) => {
       }
     }
 
-    const user = await prisma.user.update({
+    const admin = await prisma.admin.update({
       where: { id },
       data: {
         ...(email && { email }),
@@ -169,59 +148,59 @@ const updateUser = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      message: "User updated successfully",
-      data: user,
+      message: "Admin updated successfully",
+      data: admin,
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message: "Failed to update user",
+      message: "Failed to update admin",
       error: error.message,
     });
   }
 };
 
-const deleteUser = async (req, res) => {
+const deleteAdmin = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const userExists = await prisma.user.findUnique({ where: { id } });
-    if (!userExists) {
+    const adminExists = await prisma.admin.findUnique({ where: { id } });
+    if (!adminExists) {
       return res.status(404).json({
         status: "error",
-        message: "User not found",
+        message: "Admin not found",
       });
     }
 
-    await prisma.user.delete({ where: { id } });
+    await prisma.admin.delete({ where: { id } });
 
     res.status(200).json({
       status: "success",
-      message: "User deleted successfully",
+      message: "Admin deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message: "Failed to delete user",
+      message: "Failed to delete admin",
       error: error.message,
     });
   }
 };
 
-const changeUserPassword = async (req, res) => {
+const changeAdminPassword = async (req, res) => {
   try {
     const { id } = req.params;
     const { currentPassword, newPassword } = req.body;
 
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) {
+    const admin = await prisma.admin.findUnique({ where: { id } });
+    if (!admin) {
       return res.status(404).json({
         status: "error",
-        message: "User not found",
+        message: "Admin not found",
       });
     }
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    const isMatch = await bcrypt.compare(currentPassword, admin.password);
     if (!isMatch) {
       return res.status(400).json({
         status: "error",
@@ -229,7 +208,7 @@ const changeUserPassword = async (req, res) => {
       });
     }
 
-    await prisma.user.update({
+    await prisma.admin.update({
       where: { id },
       data: { password: await bcrypt.hash(newPassword, 10) },
     });
@@ -248,10 +227,10 @@ const changeUserPassword = async (req, res) => {
 };
 
 export {
-  getUsers,
-  getSingleUser,
-  createUser,
-  updateUser,
-  deleteUser,
-  changeUserPassword,
+  getAdmins,
+  getSingleAdmin,
+  createAdmin,
+  updateAdmin,
+  deleteAdmin,
+  changeAdminPassword,
 };
